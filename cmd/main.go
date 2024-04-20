@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"errors"
 	"log"
+	"net/http"
 	"os"
 	"time"
 
@@ -14,7 +15,7 @@ import (
 	"github.com/golang-migrate/migrate/v4/database/postgres"
 	_ "github.com/golang-migrate/migrate/v4/source/file"
 	_ "github.com/lib/pq"
-	healthcheck "github.com/santhozkumar/my-ente/pkg/api"
+	"github.com/santhozkumar/my-ente/pkg/api"
 	"github.com/santhozkumar/my-ente/pkg/utils/config"
 	// log "github.com/sirupsen/logrus"
 )
@@ -38,15 +39,23 @@ func main() {
 		c.String(200, "Hello, World!\n")
 	})
 
-	healthCheckHandler := healthcheck.HealthCheckHandler{DB: db}
+	healthCheckHandler := api.HealthCheckHandler{DB: db}
 	// r.GET("/ping", healthCheckHandler.Ping)
 	r.GET("/ping", timeout.New(
-        timeout.WithTimeout(5*time.Second),
-        timeout.WithHandler(healthCheckHandler.Ping)
-        timeout.WithResponse()
-)
+		timeout.WithTimeout(5*time.Second),
+		timeout.WithHandler(healthCheckHandler.Ping),
+		timeout.WithResponse(timeoutResponse)))
+
+	r.GET("/ping-db", timeout.New(
+		timeout.WithTimeout(5*time.Second),
+		timeout.WithHandler(healthCheckHandler.PintDBStats),
+		timeout.WithResponse(timeoutResponse)))
 	r.Run()
 
+}
+
+func timeoutResponse(c *gin.Context) {
+    c.JSON(http.StatusRequestTimeout, gin.H{"handler":true})
 }
 
 func setupDatabase() *sql.DB {
