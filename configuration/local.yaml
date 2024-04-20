@@ -1,0 +1,8 @@
+db:
+    host: localhost
+    port: 5432
+    name: ente_db
+    # These can be specified here, or alternatively provided via the environment
+    # as ENTE_DB_USER and ENTE_DB_PASSWORD.
+    user: postgres
+    password: santhosh
