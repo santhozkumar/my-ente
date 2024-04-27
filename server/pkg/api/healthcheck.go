@@ -7,11 +7,8 @@ import (
 	"net/http"
 	"os"
 
-	// "time"
-
 	"github.com/gin-gonic/gin"
 	"github.com/santhozkumar/my-ente/ente"
-	// "github.com/sirupsen/logrus"
 )
 
 type HealthCheckHandler struct {
@@ -36,24 +33,25 @@ func (h *HealthCheckHandler) Ping(c *gin.Context) {
 func (h *HealthCheckHandler) PintDBStats(c *gin.Context) {
 	_ = h.DB.Stats()
 	stats := h.DB.Stats()
-    logger := slog.New(slog.NewJSONHandler(os.Stdout, nil))
-    logger.LogAttrs(
-        context.Background(),
-        slog.LevelInfo,
-        "DB Status", 
-        slog.Int("MaxOpenConnections", stats.MaxOpenConnections),
-        slog.Int("OpenConnections", stats.OpenConnections),
-        slog.Int("InUse", stats.InUse),
-        slog.Int("Idle", stats.Idle),
-        slog.Int("WaitCount", int(stats.WaitCount)),
-        slog.String("WaitDuration", stats.WaitDuration.String()),
-        slog.Int("MaxIdleClosed", int(stats.MaxIdleClosed)),
-        slog.Int("MaxIdleTimeClosed", int(stats.MaxIdleTimeClosed)),
-        slog.Int("MaxLifetimeClosed", int(stats.MaxLifetimeClosed)),
-    )
-	logger.Info("DB ping start")
+	// logger := slog.New(slog.NewJSONHandler(os.Stdout, nil))
+	// logger.Handler().WithAttrs(attrs []slog.Attr)
+	slog.LogAttrs(
+		context.Background(),
+		slog.LevelInfo,
+		"DB Status",
+		slog.Int("MaxOpenConnections", stats.MaxOpenConnections),
+		slog.Int("OpenConnections", stats.OpenConnections),
+		slog.Int("InUse", stats.InUse),
+		slog.Int("Idle", stats.Idle),
+		slog.Int("WaitCount", int(stats.WaitCount)),
+		slog.String("WaitDuration", stats.WaitDuration.String()),
+		slog.Int("MaxIdleClosed", int(stats.MaxIdleClosed)),
+		slog.Int("MaxIdleTimeClosed", int(stats.MaxIdleTimeClosed)),
+		slog.Int("MaxLifetimeClosed", int(stats.MaxLifetimeClosed)),
+	)
+	slog.Info("DB ping start")
 	err := h.DB.Ping()
-	logger.Info("DB ping end")
+	slog.Info("DB ping end")
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, ente.NewInternalError(""))
 		return
